@@ -2,59 +2,149 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using System.Text;
+using System.Diagnostics;
+using System.Linq;
 
 namespace dotConverter
 {
-class DotCreator
-{
-    
-    private List<string[]> directoryCode;
-    private static cppParser cppParser;
-    public DotCreator(){
-        directoryCode = new List<string[]>();
-        cppParser = new cppParser();
-    }
-    public void createClassDiagrammFromDirectory(string path){
-        parseDirectoryCode(path);
-        string result="digraph G {\n"+
-        "\tsubgraph Diagramm {\n"+
-        "\t\tlabel = \"Diagramm\"\n"+    
-        "\t\tfontsize = 8\n"+    
-        "\t\tgraph [\n"+
-        "\t\t\tsplines=ortho,\n"+             
-        "\t\t\tnodesep=1\n\t\t]\n\n"+
-        "\tnode [\n"+
-        "\t\tfontsize = 8\n"+
-        "\t\tshape = \"record\"\n\t]\n";            
-        string className = "Dummy";
-        foreach( var file in directoryCode){
-            foreach( var line in file){
-                try{
-                    className = cppParser.getClassNameFromLine(line);
-                }
-                catch(System.FormatException e){
-                    continue;
-                }
-                result += "\n\t"+@$"{className} ["+
-                        "\n\t\t"+@$"label = ""{{{className}|\l|\l}}"""+
-                        "\n\t]\n";
-            }  
-        }
-        result += "\n\t}\n}\n";
-        using (System.IO.FileStream fs = System.IO.File.Create(path+$@"\prototyp.dot"))
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(result); 
-            fs.Write(bytes);
-        }
-    }
-    
-    public void parseDirectoryCode(string path){
-        string[] files = Directory.GetFiles(path);
+    class DotCreator
+    {
         
-        foreach (string filePath in files)
-        {
-            directoryCode.Add(System.IO.File.ReadAllLines(filePath));
+        private List<string[]> directoryFiles;
+        private static cppParser cppParser;
+        public DotCreator(){
+            directoryFiles = new List<string[]>();
+            cppParser = new cppParser();
         }
+        public void createClassDiagrammFromDirectory(string path){
+            parseDirectoryCode(path);
+            string dotDiagramm = createDotDiagrammString();
+            path = path+$@"\prototyp.dot";
+            generateDotFileWithPathAndDiagramm(path,dotDiagramm);
+            generatePNGFromDotFilePath(path);
+        }
+        private void parseDirectoryCode(string path){
+            string[] files = Directory.GetFiles(path);
+            foreach (string filePath in files)
+            {
+                directoryFiles.Add(System.IO.File.ReadAllLines(filePath));
+            }
+        } 
+        
+        private string createDotDiagrammString(){
+            string dotDiagramm = System.IO.File.ReadAllText(@"DotClassDiagrammHead.txt");
+            var dotClasses = createDotClassesFromDirectory();                     
+            foreach( var dotClass in dotClasses){
+              dotDiagramm += dotClass.ToString();
+            }
+            dotDiagramm += "\n\t}\n}\n";
+            return dotDiagramm;
+        }
+
+         private List<dotClassContainer> createDotClassesFromDirectory(){
+            List<dotClassContainer> directoryClassList = new List<dotClassContainer>();
+            foreach( string[] fileStrings in directoryFiles){
+                var fileClasses = getDotClassesFromStringArray(fileStrings);
+                directoryClassList.AddRange(fileClasses);
+            }
+            return directoryClassList;
+        }
+
+        private List<dotClassContainer> getDotClassesFromStringArray(string[] array){
+            List<dotClassContainer> classList = new List<dotClassContainer>();   
+            int currentClassIndex = -1;
+            foreach( var line in array){      
+                string className = cppParser.getClassNameFromLine(line);
+                string attributeName = cppParser.getUMLAttributeFromLine(line);
+                string functionName = cppParser.getFunctionNameFormLine(line);
+
+                if(className != null){
+                    currentClassIndex++;
+                    dotClassContainer classConatiner = new dotClassContainer(className);
+                    classList.Add(classConatiner);
+                }
+                else if (attributeName != null){
+                    classList[currentClassIndex].attributeNames.Add(attributeName);
+                }
+                else if(functionName != null){
+                    classList[currentClassIndex].functionNames.Add(functionName);
+                }
+            }
+            return classList;
+        }
+
+        private void generateDotFileWithPathAndDiagramm(string path,string diagramm){
+            using (System.IO.FileStream fs = System.IO.File.Create(path))
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(diagramm); 
+                fs.Write(bytes);
+            }
+        }
+        
+
+       
+
+        private struct dotClassContainer{
+            public dotClassContainer(string className){
+                name = className;
+                attributeNames = new List<string>();
+                functionNames = new List<string>();
+            }
+            public string name { get;set; }
+            public List<string> attributeNames { get; set;}
+            public List<string> functionNames { get; set;}
+            public override string ToString(){
+                string attributeBody="";
+                string functionBody="";
+                foreach(var attribute in attributeNames){
+                    attributeBody+=$"{attribute}<br align=\"left\"/>\n\t\t";
+                }
+                 foreach(var attribute in functionNames){
+                    functionBody+=$"{attribute}<br align=\"left\"/>\n\t\t";
+                }
+
+                return  $" \n\t{name} [\n\t\t"+
+               $"label =  <<table border=\"0\" cellspacing=\"0\" cellborder=\"1\">\n\t\t"+
+              $@"<tr> <td>{name}</td> </tr>"+"\n\t\t"+
+              $"<tr><td>{attributeBody}</td></tr>"+
+              $"<tr><td>{functionBody}</td></tr>"+
+              "</table>>\n\t]";
+            } 
+        } 
+        private void generatePNGFromDotFilePath(string filePath){
+            var dotDiagrammFilePath =new filePathMetaData(filePath);
+            string argText = $@"-Tpng {dotDiagrammFilePath} -o {dotDiagrammFilePath.ToStringWithoutType()}.png";
+            startDotProcessWithArg(argText);
+        }
+
+        private struct filePathMetaData{
+            public filePathMetaData(string newFilePath){
+                fileName = newFilePath.Split($@"\").Last();
+                path = newFilePath.Remove(newFilePath.Length-fileName.Length);
+                fileType =  fileName.Split('.').Last();
+                fileName= fileName.Split('.').First();
+            }
+            public string path { get; }
+            public string fileName { get; }
+            public string fileType { get; }
+            public override string ToString() => $@"{path}{fileName}.{fileType}";
+            public string ToStringWithoutType() =>  $@"{path}{fileName}";
+        } 
+
+        private void startDotProcessWithArg(string arg){
+            var proc = new Process 
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "dot.exe",
+                    Arguments =  arg,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+            proc.Start();
+        }
+      
     }
-}
 }

@@ -3,7 +3,7 @@ digraph G {
 		label = "Diagramm"
 		fontsize = 12
 		graph [
-			splines=ortho,
+			//splines=ortho,
 			nodesep=1
 		]
 

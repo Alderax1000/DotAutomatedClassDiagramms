@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "EnyehQctELjsgntyOkh7lt3odSMNe/hMXhxiyji/F81+JkD66zppiRdeOCFsyljwpc+4PIV/cW5y+kklbLQaGQ==",
+  "dgSpecHash": "UYWdHuZzxa/LC6l3+vMlPmL8HwyDenGPPhmhdXt+OSptbmI7QpYPxpZwpFMY8IBf6sHcLE9QNkLTZkuKe3FOtQ==",
   "success": true,
-  "projectFilePath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotConverter\\DotConverter.csproj",
+  "projectFilePath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\DotConverter.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }

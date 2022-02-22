@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Visual Studio 2019\\Eigene Projekte\\DotConverter\\DotConverter.csproj",
+      "projectUniqueName": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\DotConverter.csproj",
       "projectName": "DotConverter",
-      "projectPath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotConverter\\DotConverter.csproj",
+      "projectPath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\DotConverter.csproj",
       "packagesPath": "C:\\Users\\hirsc\\.nuget\\packages\\",
-      "outputPath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotConverter\\obj\\",
+      "outputPath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\hirsc\\AppData\\Roaming\\NuGet\\NuGet.Config",

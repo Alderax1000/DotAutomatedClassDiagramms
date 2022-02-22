@@ -28,7 +28,6 @@ namespace dotConverter
             {
                 Console.WriteLine("Es wurde kein Argument übergeben !");
             }
-            var test = "    public     string classFileDestinationPath;";
             dotCreator.createClassDiagrammFromDirectory(destPath);
         }
 

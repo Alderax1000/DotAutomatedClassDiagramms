@@ -7,7 +7,7 @@ namespace dotConverter
 class dotParser
 {
     
-     string[] excludes = new string[] { "edge", "node", "graph" };
+    private string[] excludes = new string[] { "edge", "node", "graph" };
     public dotParser()
     {
         
