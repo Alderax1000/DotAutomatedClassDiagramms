@@ -13,9 +13,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\DotConverter.csproj",
-      "projectName": "DotConverter",
-      "projectPath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\DotConverter.csproj",
+      "projectUniqueName": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\DotAutomatedClassCreator.csproj",
+      "projectName": "DotAutomatedClassCreator",
+      "projectPath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\DotAutomatedClassCreator.csproj",
       "packagesPath": "C:\\Users\\hirsc\\.nuget\\packages\\",
       "outputPath": "D:\\Visual Studio 2019\\Eigene Projekte\\DotAutomatedClassDiagramms\\software\\obj\\",
       "projectStyle": "PackageReference",

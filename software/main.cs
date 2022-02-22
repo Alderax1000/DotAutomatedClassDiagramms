@@ -8,14 +8,14 @@ namespace dotConverter
 
     class Program
     {
-        private static dotParser dotPars;
+        private static DotParser dotPars;
 
         private static CodeCreator codeCreator;
 
         private static DotCreator dotCreator;
         static void Main(string[] args)
         {
-            dotPars = new dotParser();
+            dotPars = new DotParser();
             dotCreator = new DotCreator();
             var destPath =@"C:\Users\hirsc\Desktop\debug";
             codeCreator = new CodeCreator(destPath,dotPars);

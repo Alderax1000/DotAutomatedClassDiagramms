@@ -11,10 +11,10 @@ namespace dotConverter
     {
         
         private List<string[]> directoryFiles;
-        private static cppParser cppParser;
+        private static CsharpParser cppParser;
         public DotCreator(){
             directoryFiles = new List<string[]>();
-            cppParser = new cppParser();
+            cppParser = new CsharpParser();
         }
         public void createClassDiagrammFromDirectory(string path){
             parseDirectoryCode(path);
@@ -42,7 +42,7 @@ namespace dotConverter
             foreach( var pair in connections){
               dotDiagramm += "\t"+pair.Item1+" -> "+pair.Item2+"\n";
             }
-            dotDiagramm += "\n\t}\n}\n";
+            dotDiagramm += "\n}\n";
             return dotDiagramm;
         }
 
@@ -61,7 +61,7 @@ namespace dotConverter
             foreach( var line in array){      
                 string className = cppParser.getClassNameFromLine(line);
                 string attributeName = cppParser.getUMLAttributeFromLine(line);
-                string functionName = cppParser.getFunctionNameFormLine(line);
+                string functionName = cppParser.getUMLFunctionFromLine(line);
 
                 if(className != null){
                     currentClassIndex++;
@@ -115,23 +115,46 @@ namespace dotConverter
             public List<string> attributeNames { get; set;}
             public List<string> functionNames { get; set;}
             public override string ToString(){
-                string attributeBody="";
-                string functionBody="";
-                foreach(var attribute in attributeNames){
-                    attributeBody+=$"{attribute}<br align=\"left\"/>\n\t\t";
-                }
-                 foreach(var attribute in functionNames){
-                    functionBody+=$"{attribute}<br align=\"left\"/>\n\t\t";
-                }
+               
+                string attributeBody= createFormatedClassBlockForStringList(attributeNames);
+                string functionBody=createFormatedClassBlockForStringList(functionNames);
+
 
                 return  $" \n\t{name} [\n\t\t"+
                $"label =  <<table border=\"0\" cellspacing=\"0\" cellborder=\"1\">\n\t\t"+
-              $@"<tr> <td>{name}</td> </tr>"+"\n\t\t"+
-              $"<tr><td>{attributeBody}</td></tr>"+
-              $"<tr><td>{functionBody}</td></tr>"+
-              "</table>>\n\t]";
+              $@"<tr> <td>"+"\t\t"+$"{name}"+"\t\t"+@"</td> </tr>"+"\n\t\t"+
+              $"<tr><td>\n\t\t{attributeBody}"+
+              "</td></tr><tr><td>\n"+
+              "\n\t\t"+functionBody+"</td></tr>"+
+              "</table>>\n\t]\n";
+            }
+            private string createFormatedClassBlockForStringList(List<string> list){
+                int tabLength = 4;
+                string result ="";
+                if(list.Count > 0){
+                    int maxNameLength = list.Max(x=>x.Split(":")[0].Trim().Length);
+                    int maxTypeLength = list.Max(x=>x.Split(":")[1].Trim().Length);
+                    maxNameLength += 4 - (maxNameLength % tabLength); 
+                    maxTypeLength += 4 - (maxTypeLength % tabLength); 
+                    foreach(var item in list){
+                        var itemParts = item.Split(":");
+                        var functionNameOffset = getTabOffsetForStringWithMaxLength(itemParts[0].Trim(),maxNameLength);
+                        var functionTypeOffset = getTabOffsetForStringWithMaxLength(itemParts[1].Trim(),maxTypeLength);
+                        result+=$"{itemParts[0].Trim()}{functionNameOffset}:{itemParts[1].Trim()}{functionTypeOffset}<br align=\"left\"/>\n\t\t";
+                    }
+                }
+                return result;
+            }
+            private string getTabOffsetForStringWithMaxLength(string selection,int maxLength){
+                int tabLength = 4;
+                bool isOffsetTabNeeded = selection.Length % tabLength != 0;
+                int tabCount = (int)Math.Floor((double)(maxLength-selection.Length)/tabLength);
+                tabCount += isOffsetTabNeeded ? 1: 0;
+                return new String('\t',tabCount);
             } 
-        } 
+        }
+        
+
         private void generatePNGFromDotFilePath(string filePath){
             var dotDiagrammFilePath =new filePathMetaData(filePath);
             string argText = $@"-Tpng {dotDiagrammFilePath} -o {dotDiagrammFilePath.ToStringWithoutType()}.png";

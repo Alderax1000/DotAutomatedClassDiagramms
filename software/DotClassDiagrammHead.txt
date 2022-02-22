@@ -1,14 +1,12 @@
 digraph G {
-	subgraph Diagramm {
-		label = "Diagramm"
-		fontsize = 12
-		graph [
-			//splines=ortho,
-			nodesep=1
-		]
+	fontsize = 12
+	graph [
+		splines=ortho,
+		nodesep=1
+	]
 
-		node [
-			fontsize = 12
-			shape = none width=0 height=0 margin=0
-		]
+	node [
+		fontsize = 12
+		shape = none width=0 height=0 margin=0
+	]
 

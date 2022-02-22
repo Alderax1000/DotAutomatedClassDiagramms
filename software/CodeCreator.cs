@@ -8,14 +8,14 @@ namespace dotConverter
     {
 
 
-        public CodeCreator(string destPath, dotParser newParser)
+        public CodeCreator(string destPath, DotParser newParser)
         {
             classFileDestinationPath = destPath;
             parser = newParser;
         }
 
         public  string classFileDestinationPath;
-        private dotParser parser;
+        private DotParser parser;
         struct attribute
         {              public string protection;
             public string type;
@@ -94,7 +94,7 @@ namespace dotConverter
                 }
             }
 
-            output.Add("}");
+            //output.Add("}");
             return output;
         }
 

@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 namespace dotConverter
 {
-class dotParser
+class DotParser
 {
     
     private string[] excludes = new string[] { "edge", "node", "graph" };
-    public dotParser()
+    public DotParser()
     {
         
     }
