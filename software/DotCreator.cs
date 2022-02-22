@@ -33,9 +33,14 @@ namespace dotConverter
         
         private string createDotDiagrammString(){
             string dotDiagramm = System.IO.File.ReadAllText(@"DotClassDiagrammHead.txt");
-            var dotClasses = createDotClassesFromDirectory();                     
+            var dotClasses = createDotClassesFromDirectory();
+            var connections = getClassConnectionsFromClassList(dotClasses);                     
             foreach( var dotClass in dotClasses){
               dotDiagramm += dotClass.ToString();
+            }
+            dotDiagramm+="\n\n";
+            foreach( var pair in connections){
+              dotDiagramm += "\t"+pair.Item1+" -> "+pair.Item2+"\n";
             }
             dotDiagramm += "\n\t}\n}\n";
             return dotDiagramm;
@@ -73,6 +78,22 @@ namespace dotConverter
             return classList;
         }
 
+        private List<Tuple<string,string>> getClassConnectionsFromClassList(List<dotClassContainer> classList){
+            var connections =new List<Tuple<string,string>>();
+            for(int i=0;i<classList.Count;i++){
+                for(int j=i+1;j<classList.Count;j++){
+                    foreach(string umlAttributeName in classList[j].attributeNames){
+                        string className = classList[i].name;
+                        string attributeName = umlAttributeName.Split(":").Last();
+                        attributeName = attributeName.Replace("<u>","").Replace("</u>","").Trim();
+                        if(className.Equals(attributeName)){
+                            connections.Add(new Tuple<string, string>(classList[i].name,classList[j].name));
+                        }
+                    }
+                }
+            }
+            return connections;
+        }
         private void generateDotFileWithPathAndDiagramm(string path,string diagramm){
             using (System.IO.FileStream fs = System.IO.File.Create(path))
             {
