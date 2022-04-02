@@ -5,23 +5,26 @@ using System.Text;
 using System.Diagnostics;
 using System.Linq;
 
-namespace dotConverter
+namespace DotAutomatedClassCreator
 {
     class DotCreator
     {
         
         private List<string[]> directoryFiles;
         private static CsharpParser cppParser;
-        public DotCreator(){
+        public DotCreator()
+        {
             directoryFiles = new List<string[]>();
             cppParser = new CsharpParser();
         }
-        public void createClassDiagrammFromDirectory(string path){
-            parseDirectoryCode(path);
+
+        public void createClassDiagrammFromDirectory(string srcPath, string destPath)
+        {
+            parseDirectoryCode(srcPath);
             string dotDiagramm = createDotDiagrammString();
-            path = path+$@"\prototyp.dot";
-            generateDotFileWithPathAndDiagramm(path,dotDiagramm);
-            generatePNGFromDotFilePath(path);
+            destPath = destPath + $@"\prototyp.dot";
+            generateDotFileWithPathAndDiagramm(destPath, dotDiagramm);
+            generatePNGFromDotFilePath(destPath);
         }
         private void parseDirectoryCode(string path){
             string[] files = Directory.GetFiles(path);
@@ -31,8 +34,9 @@ namespace dotConverter
             }
         } 
         
-        private string createDotDiagrammString(){
-            string dotDiagramm = System.IO.File.ReadAllText(@"DotClassDiagrammHead.txt");
+        private string createDotDiagrammString()
+        {
+            string dotDiagramm = System.IO.File.ReadAllText(@"..\..\..\..\resources\DotClassDiagrammHead.txt");
             var dotClasses = createDotClassesFromDirectory();
             var connections = getClassConnectionsFromClassList(dotClasses);                     
             foreach( var dotClass in dotClasses){
@@ -157,7 +161,7 @@ namespace dotConverter
 
         private void generatePNGFromDotFilePath(string filePath){
             var dotDiagrammFilePath =new filePathMetaData(filePath);
-            string argText = $@"-Tpng {dotDiagrammFilePath} -o {dotDiagrammFilePath.ToStringWithoutType()}.png";
+            string argText = $"-Tpng \"{dotDiagrammFilePath}\" -o \"{dotDiagrammFilePath.ToStringWithoutType()}.png\"";
             startDotProcessWithArg(argText);
         }
 

@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using System;
 using System.Text;
 using System.Linq;
-namespace dotConverter
+using System.IO;
+namespace DotAutomatedClassCreator
 {
     class CodeCreator
     {
@@ -25,6 +26,13 @@ namespace dotConverter
             {
                 return $"{protection} {type} {name}";
             }
+        }
+
+        public void createSourceCodeFormDotDirectoryPath(string srcPath, string destPath)
+        {
+            string[] readText = File.ReadAllLines(srcPath);
+            classFileDestinationPath = destPath;
+            parseForClassesAndCreateFiles(readText);
         }
 
         public void parseForClassesAndCreateFiles(string[] text)

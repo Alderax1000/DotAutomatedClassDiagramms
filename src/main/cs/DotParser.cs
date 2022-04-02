@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 
-namespace dotConverter
+namespace DotAutomatedClassCreator
 {
 class DotParser
 {
