@@ -18,40 +18,66 @@ class CsharpParser{
         return null;
     }
 
-    public string[] getFunctionNamePartsFormLine(string line){
+
+    private struct functionSignature
+    {
+        public string accesType;
+        public string modifier;
+        public string returnType;
+        public string methodName;
+        public string[] arguments;
+    }
+
+    private functionSignature getFunctionSignatureFormLine(string line){
         string acessType = "((public)|(private)){1}";
         string returPrefab = @"([a-zA-Z][\w\[\]<>]*\s+)?";
         string namePrefab = @"[a-zA-Z]\w*";
-        
         string expr = $@"\s*{acessType}\s+(static\s+)?{returPrefab}{namePrefab}\(.*\)";
-        if(Regex.IsMatch(line,expr)){
+        functionSignature funcSig = new functionSignature();
+
+        if (Regex.IsMatch(line,expr)){
             if(line.IndexOf(')')<line.Length-1){
                 line = line.Remove(line.IndexOf(')'));
             }
             line = clearSharpBracketsFromString(line);
             var functionStructur = line.Remove(line.IndexOf('(')).Split();
-            functionStructur = Array.FindAll(functionStructur,s=>!s.Equals(""));
-            if(functionStructur.Length < 3){
-                var temp = new string[3];
-                temp[0] = functionStructur[0];
-                temp[1] = functionStructur[1];
-                temp[2] = functionStructur[1];
-                functionStructur = temp;
+            functionStructur = Array.FindAll(functionStructur, s => !s.Equals(""));
+
+            funcSig.accesType = functionStructur[0];
+            if (functionStructur.Length == 2)
+            {
+                funcSig.methodName = functionStructur[1];
+                funcSig.returnType = functionStructur[1];
             }
-            var funcArguments = line.Substring(line.IndexOf('(')).Trim('(',')').Split(',');
-            var functionParts = new string[funcArguments.Length + functionStructur.Length];
-            functionStructur.CopyTo(functionParts,0);
-            funcArguments.CopyTo(functionParts,functionStructur.Length);   
-            return functionParts;
+            else if (functionStructur.Length == 4){
+                funcSig.modifier = functionStructur[1];
+                funcSig.returnType = functionStructur[2];
+                funcSig.methodName = functionStructur[3];
+            }
+            else
+            {
+                funcSig.returnType = functionStructur[1];
+                funcSig.methodName = functionStructur[2];
+            }
+            funcSig.arguments = line.Substring(line.IndexOf('(')).Trim('(',')').Split(',');
+            //var functionParts = new string[funcArguments.Length + functionStructur.Length];
+            //functionStructur.CopyTo(functionParts,0);
+            //funcArguments.CopyTo(functionParts,functionStructur.Length);   
+
         }
-        return null;
+        return funcSig;
     }
 
+
     public string getUMLFunctionFromLine(string line){
-        string[] funcParts = getFunctionNamePartsFormLine(line);
-        if(funcParts != null){
-            char protection = getProtectionFromLine(line);
-             return protection+" "+funcParts[2]+"() : "+funcParts[1];
+        functionSignature funcSig = getFunctionSignatureFormLine(line);
+        if( funcSig.methodName is not null && funcSig.returnType is not null){
+            char protection = getProtectionFromLine(funcSig.accesType);
+            if (funcSig.modifier is not null && funcSig.modifier.Equals("static"))
+            {
+                return $"{protection} <u>{funcSig.methodName}() : {funcSig.returnType}@</u>";
+            }
+            return $"{protection} {funcSig.methodName}() : {funcSig.returnType}@";
         }
         else{
             return null;
@@ -90,9 +116,9 @@ class CsharpParser{
             string[] attributeParts = attribute.Split();
             char protection = getProtectionFromLine(line);
             if(attributeParts.Contains("static")){
-                return $"{protection} <u>{attributeParts[2]} : {attributeParts[1]}</u>";            
+                return $"{protection} <u>{attributeParts[2]} : {attributeParts[1]}@</u>";            
             }
-            return $"{protection} {attributeParts[1]} : {attributeParts[0]}";
+            return $"{protection} {attributeParts[1]} : {attributeParts[0]}@";
         }
         else{
             return null;

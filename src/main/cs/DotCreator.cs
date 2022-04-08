@@ -53,8 +53,9 @@ namespace DotAutomatedClassCreator
          private List<dotClassContainer> createDotClassesFromDirectory(){
             List<dotClassContainer> directoryClassList = new List<dotClassContainer>();
             foreach( string[] fileStrings in directoryFiles){
-                var fileClasses = getDotClassesFromStringArray(fileStrings);
+                List<dotClassContainer> fileClasses = getDotClassesFromStringArray(fileStrings);
                 directoryClassList.AddRange(fileClasses);
+               // directoryClassList = fileClasses;
             }
             return directoryClassList;
         }
@@ -79,6 +80,12 @@ namespace DotAutomatedClassCreator
                     classList[currentClassIndex].functionNames.Add(functionName);
                 }
             }
+
+            foreach (var container in classList)
+            {
+                 container.format();
+            }
+            
             return classList;
         }
 
@@ -89,6 +96,7 @@ namespace DotAutomatedClassCreator
                     foreach(string umlAttributeName in classList[j].attributeNames){
                         string className = classList[i].name;
                         string attributeName = umlAttributeName.Split(":").Last();
+                        attributeName = attributeName.Replace("<br align=\"left\"/>", "").Trim();
                         attributeName = attributeName.Replace("<u>","").Replace("</u>","").Trim();
                         if(className.Equals(attributeName)){
                             connections.Add(new Tuple<string, string>(classList[i].name,classList[j].name));
@@ -109,55 +117,6 @@ namespace DotAutomatedClassCreator
 
        
 
-        private struct dotClassContainer{
-            public dotClassContainer(string className){
-                name = className;
-                attributeNames = new List<string>();
-                functionNames = new List<string>();
-            }
-            public string name { get;set; }
-            public List<string> attributeNames { get; set;}
-            public List<string> functionNames { get; set;}
-            public override string ToString(){
-               
-                string attributeBody= createFormatedClassBlockForStringList(attributeNames);
-                string functionBody=createFormatedClassBlockForStringList(functionNames);
-
-
-                return  $" \n\t{name} [\n\t\t"+
-               $"label =  <<table border=\"0\" cellspacing=\"0\" cellborder=\"1\">\n\t\t"+
-              $@"<tr> <td>"+"\t\t"+$"{name}"+"\t\t"+@"</td> </tr>"+"\n\t\t"+
-              $"<tr><td>\n\t\t{attributeBody}"+
-              "</td></tr><tr><td>\n"+
-              "\n\t\t"+functionBody+"</td></tr>"+
-              "</table>>\n\t]\n";
-            }
-            private string createFormatedClassBlockForStringList(List<string> list){
-                int tabLength = 4;
-                string result ="";
-                if(list.Count > 0){
-                    int maxNameLength = list.Max(x=>x.Split(":")[0].Trim().Length);
-                    int maxTypeLength = list.Max(x=>x.Split(":")[1].Trim().Length);
-                    maxNameLength += 4 - (maxNameLength % tabLength); 
-                    maxTypeLength += 4 - (maxTypeLength % tabLength); 
-                    foreach(var item in list){
-                        var itemParts = item.Split(":");
-                        var functionNameOffset = getTabOffsetForStringWithMaxLength(itemParts[0].Trim(),maxNameLength);
-                        var functionTypeOffset = getTabOffsetForStringWithMaxLength(itemParts[1].Trim(),maxTypeLength);
-                        result+=$"{itemParts[0].Trim()}{functionNameOffset}:{itemParts[1].Trim()}{functionTypeOffset}<br align=\"left\"/>\n\t\t";
-                    }
-                }
-                return result;
-            }
-            private string getTabOffsetForStringWithMaxLength(string selection,int maxLength){
-                int tabLength = 4;
-                bool isOffsetTabNeeded = selection.Length % tabLength != 0;
-                int tabCount = (int)Math.Floor((double)(maxLength-selection.Length)/tabLength);
-                tabCount += isOffsetTabNeeded ? 1: 0;
-                return new String('\t',tabCount);
-            } 
-        }
-        
 
         private void generatePNGFromDotFilePath(string filePath){
             var dotDiagrammFilePath =new filePathMetaData(filePath);
